@@ -247,13 +247,12 @@ body.dark .section-separator {
     color: white; 
   } /* Featured Image */ 
   .featured-card .featured-image {
-    position: absolute; 
-    inset: 0; 
-    width: 100%; 
-    height: 100%;
-    object-fit: 
-    cover; 
-    z-index: 1;
+     position: absolute; 
+     inset: 0; 
+     width: 100%; 
+     height: 100%;
+      object-fit: cover; 
+      z-index: 1;
      }
 
 /* Gradient Overlay */
