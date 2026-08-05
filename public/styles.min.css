@@ -236,14 +236,14 @@ body.dark .section-separator {
 /* Featured Card */
 .featured-card {
   position: center;
-  width: 90%;
-  height: 420px;
+  width: 80%;
+  height: 210px;
   border-radius: 18px;
   overflow: hidden;
   cursor: pointer;
   display: flex;
   align-items: flex-end;
-  padding: 30px;
+  padding: 35px;
   color: white;
 }
 

@@ -242,7 +242,7 @@ body.dark .section-separator {
     width: min(1200px, 92%);
     margin: 40px auto;
     cursor: pointer;
-    height: 420px;
+    height: 210px;
 
     border-radius: 22px;
     overflow: hidden;
