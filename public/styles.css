@@ -234,18 +234,21 @@ body.dark .section-separator {
    FEATURED ARTICLE (IMPROVED)
 ------------------------------ */
 /* Featured Card */
-.featured-card {
-  position: center;
-  width: 90%;
-  height: 420px;
-  border-radius: 18px;
-  overflow: hidden;
-  cursor: pointer;
-  display: flex;
-  align-items: flex-end;
-  padding: 30px;
-  color: white;
+
+
+  .featured-card {
+    position: relative;
+
+    width: min(1200px, 92%);
+    margin: 40px auto;
+    cursor: pointer;
+    height: 420px;
+
+    border-radius: 22px;
+    overflow: hidden;
+    color: white;
 }
+
 
 /* Featured Image */
 .featured-card .featured-image {
