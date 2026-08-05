@@ -235,7 +235,7 @@ body.dark .section-separator {
 ------------------------------ */
 /* Featured Card */
 .featured-card {
-  position: relative;
+  position: center;
   width: 90%;
   height: 420px;
   border-radius: 18px;
