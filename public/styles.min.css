@@ -237,7 +237,9 @@ body.dark .section-separator {
 .featured-card {
   position: center;
   width: 80%;
-  height: 210px;
+  margin-left: 20px;
+  margin-right: 20px;
+  height: 105px;
   border-radius: 18px;
   overflow: hidden;
   cursor: pointer;
