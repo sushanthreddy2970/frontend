@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LOOP — Tech • Finance • Innovation</title>
+  <link rel="stylesheet" href="styles.min.css" />
+</head>
+
+<body class="page-fade" data-page="home">
+
+  <!-- NAVBAR -->
+  <nav class="navbar glass">
+    <h2>THE LOOP</h2>
+    <div class="nav-links">
+      <a href="index.html" class="active">Home</a>
+      <a href="articles.html">Articles</a>
+      <a href="about.html">About</a>
+    </div>
+  </nav>
+
+  <!-- HEADER / HERO -->
+  <header class="hero">
+    <h4>Explore the future with</h4>
+    <h1>THE LOOP</h1>
+    <p>The Most Recent Articles</p>
+    <button id="themeToggle">🌙</button>
+  </header>
+
+  <!-- SEARCH BAR -->
+  <section class="search-section">
+    <input id="search" placeholder="Search articles..." />
+  </section>
+
+  <!-- CATEGORY FILTERS -->
+  <section class="filter-section">
+    <button class="filter-btn active" data-category="all">All</button>
+    <button class="filter-btn" data-category="Technology">Technology</button>
+    <button class="filter-btn" data-category="Finance">Finance</button>
+    <button class="filter-btn" data-category="Innovation">Innovation</button>
+  </section>
+
+  <!-- SORTING -->
+  <section class="sort-section">
+    <label for="sort">Sort by:</label>
+    <select id="sort">
+      <option value="newest">Newest first</option>
+      <option value="oldest">Oldest first</option>
+    </select>
+  </section>
+
+  <!-- FEATURED ARTICLE -->
+  <section id="featured" class="featured-section"></section>
+
+  <!-- ARTICLE GRID -->
+  <main id="articles"></main>
+
+  <!-- ARTICLE DETAIL MODAL -->
+  <div id="articleModal" class="modal">
+    <div class="modal-content">
+      <span id="modalClose" class="modal-close">&times;</span>
+      <img id="modalImage" />
+      <h2 id="modalTitle"></h2>
+      <p id="modalCategory"></p>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <!-- INFINITE SCROLL LOADER (hidden on home by JS) -->
+  <div id="infiniteLoader" class="infinite-loader">Loading more articles...</div>
+
+  <!-- SCROLL TO TOP BUTTON -->
+  <button id="scrollTop">↑</button>
+
+  <!-- FOOTER -->
+  <footer class="loop-footer">
+    <div class="footer-content">
+      <h3>THE LOOP</h3>
+      <p>Technology • Finance • Innovation</p>
+
+      <div class="footer-icons">
+        <!-- X -->
+        <a href="#" class="footer-icon" aria-label="X">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M3 3L21 21M21 3L3 21" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </a>
+
+        <!-- LinkedIn -->
+        <a href="#" class="footer-icon" aria-label="LinkedIn">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M4 4H8V20H4V4ZM10 9H14V11C14.6 10 16 9 18 9C21 9 22 11 22 14V20H18V15C18 13.5 17.5 13 16.5 13C15.5 13 15 13.7 15 15V20H11V9H10Z" 
+                  fill="currentColor"/>
+          </svg>
+        </a>
+
+        <!-- GitHub -->
+        <a href="#" class="footer-icon" aria-label="GitHub">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2C6.5 2 2 6.5 2 12C2 16.4 4.9 20.1 8.9 21.4C9.4 21.5 9.6 21.2 9.6 20.9V18.9C6.8 19.6 6.2 17.7 6.2 17.7C5.7 16.4 5 16 5 16C4 15.3 5.1 15.3 5.1 15.3C6.2 15.4 6.8 16.5 6.8 16.5C7.8 18.2 9.4 17.7 10 17.4C10.1 16.7 10.4 16.3 10.7 16C8.3 15.7 5.8 14.8 5.8 10.9C5.8 9.8 6.2 8.9 6.8 8.2C6.7 7.9 6.3 6.8 6.9 5.3C6.9 5.3 7.8 5 9.6 6.3C10.5 6 11.5 5.9 12.5 5.9C13.5 5.9 14.5 6 15.4 6.3C17.2 5 18.1 5.3 18.1 5.3C18.7 6.8 18.3 7.9 18.2 8.2C18.8 8.9 19.2 9.8 19.2 10.9C19.2 14.8 16.7 15.7 14.3 16C14.7 16.3 15 16.8 15 17.6V20.9C15 21.2 15.2 21.5 15.7 21.4C19.7 20.1 22.6 16.4 22.6 12C22.6 6.5 18.1 2 12 2Z" 
+                fill="currentColor"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+
+  <p class="footer-copy">© 2026 THE LOOP — All Rights Reserved</p>
+</footer>
+
+  <script src="script.min.js"></script>
+</body>
+</html>

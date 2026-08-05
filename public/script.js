@@ -1,0 +1,452 @@
+// ------------------------------
+// GLOBAL STATE
+// ------------------------------
+
+const API =
+  ["localhost", "127.0.0.1"].includes(location.hostname)
+    ? "http://localhost:5001"
+    : "https://loop-backend-1fb0.onrender.com";
+
+let allArticles = [];
+let currentList = [];
+let currentIndex = 0;
+const BATCH_SIZE = 6;
+let isLoadingMore = false;
+
+// ------------------------------
+// DOM ELEMENTS
+// ------------------------------
+const articlesContainer = document.getElementById("articles");
+const featuredSection = document.getElementById("featured");
+const infiniteLoader = document.getElementById("infiniteLoader");
+const searchInput = document.getElementById("search");
+const sortSelect = document.getElementById("sort");
+const filterButtons = document.querySelectorAll(".filter-btn");
+
+// Modal elements
+const modal = document.getElementById("articleModal");
+const modalClose = document.getElementById("modalClose");
+const modalImage = document.getElementById("modalImage");
+const modalTitle = document.getElementById("modalTitle");
+const modalCategory = document.getElementById("modalCategory");
+const modalContent = document.getElementById("modalContent");
+
+// ------------------------------
+// LOAD ARTICLES FROM BACKEND
+// ------------------------------
+async function loadArticles() {
+  if (!articlesContainer) return;
+
+  articlesContainer.innerHTML = "";
+  for (let i = 0; i < BATCH_SIZE; i++) {
+    const skel = document.createElement("div");
+    skel.className = "skeleton";
+    articlesContainer.appendChild(skel);
+  }
+
+  try {
+    const res = await fetch(`${API}/articles`);
+    const data = await res.json();
+    allArticles = Array.isArray(data) ? data : [];
+
+    applyFiltersAndRender();
+  } catch (err) {
+    console.error("Error loading articles:", err);
+    articlesContainer.innerHTML = "<p>Failed to load articles.</p>";
+  }
+}
+
+// ------------------------------
+// FILTER + SORT + RENDER
+// ------------------------------
+function applyFiltersAndRender() {
+  if (!articlesContainer || !featuredSection) return;
+
+  const searchTerm = (searchInput?.value || "").toLowerCase();
+  const activeFilterBtn = document.querySelector(".filter-btn.active");
+  const category = activeFilterBtn ? activeFilterBtn.dataset.category : "all";
+  const sortMode = sortSelect ? sortSelect.value : "newest";
+  const page = document.body.dataset.page;
+
+  // Filter + search
+  currentList = allArticles.filter(article => {
+    const matchesCategory =
+      category === "all" || (article.category || "General") === category;
+
+    const text =
+      (article.title || "") +
+      " " +
+      (article.content || "") +
+      " " +
+      (article.category || "");
+
+    const matchesSearch = text.toLowerCase().includes(searchTerm);
+    return matchesCategory && matchesSearch;
+  });
+
+  // Sort newest → oldest
+  currentList.sort((a, b) => {
+    const da = new Date(a.createdAt || 0).getTime();
+    const db = new Date(b.createdAt || 0).getTime();
+    return sortMode === "newest" ? db - da : da - db;
+  });
+
+  // HOMEPAGE LIMIT
+  if (page === "home") {
+    // Only keep the first 5 articles (1 featured + 4 latest)
+    currentList = currentList.slice(0, 5);
+  }
+
+  currentIndex = 0;
+  articlesContainer.innerHTML = "";
+
+  // Featured
+  renderFeatured();
+
+  if (page === "home") {
+    // Render next 4 latest (same card layout)
+    const extra = currentList.slice(1, 5);
+
+    extra.forEach(article => {
+      const div = document.createElement("div");
+      div.className = "article";
+      div.dataset.category = article.category || "General";
+
+      const smallImg = article.thumbnail?.url
+        ? article.thumbnail.url.replace(
+            "/upload/",
+            "/upload/w_300,h_200,c_fill,q_auto,f_auto/"
+          )
+        : "";
+
+      div.innerHTML = `
+        ${smallImg ? `<img src="${smallImg}" />` : ""}
+        <h2>${article.title || "Untitled"}</h2>
+        <p>${(article.content || "")
+          .replace(/<[^>]+>/g, "")
+          .substring(0, 120)}...</p>
+      `;
+
+      div.onclick = () => openModal(article);
+
+      articlesContainer.appendChild(div);
+    });
+
+    if (infiniteLoader) {
+      infiniteLoader.style.display = "none";
+    }
+
+    setupScrollReveal();
+    return;
+  }
+
+  // Articles page: start infinite scroll
+  if (infiniteLoader) {
+    infiniteLoader.style.display = "block";
+    infiniteLoader.textContent = "Scroll to load more...";
+  }
+
+  loadNextBatch();
+}
+
+// ------------------------------
+// FEATURED ARTICLE
+// ------------------------------
+function renderFeatured() {
+  if (!featuredSection) return;
+
+  featuredSection.innerHTML = "";
+
+  if (!currentList.length) return;
+
+  const article = currentList[0];
+
+  const featuredImg = article.thumbnail?.url
+    ? article.thumbnail.url.replace(
+        "/upload/",
+        "/upload/w_900,h_450,c_fill,q_auto,f_auto/"
+      )
+    : "";
+
+  const div = document.createElement("div");
+  div.className = "featured-card";
+
+  div.innerHTML = `
+    ${featuredImg ? `<img class="featured-image" src="${featuredImg}" />` : ""}
+    <div class="featured-meta">
+      ${article.category ? article.category + " • " : ""}
+      ${article.createdAt
+        ? new Date(article.createdAt).toLocaleDateString()
+        : ""}
+    </div>
+    <div class="featured-title">${article.title || "Untitled"}</div>
+    <div class="featured-readmore">Read more →</div>
+  `;
+
+  div.onclick = () => openModal(article);
+
+  featuredSection.appendChild(div);
+
+const page = document.body.dataset.page;
+document.querySelector(".section-separator")?.remove();
+const separator = document.createElement("div");
+separator.className = "section-separator";
+
+if (page === "home") {
+  separator.textContent = "Latest Articles";
+} else if (page === "articles") {
+  separator.textContent = "The LOOP Archive";
+}
+
+// Append to the correct section
+const articlesSection = document.querySelector("#articles");
+
+// insert separator BEFORE the grid, not inside it
+articlesSection.parentNode.insertBefore(separator, articlesSection);
+
+
+
+}
+
+// ------------------------------
+// LOAD NEXT BATCH (INFINITE SCROLL)
+// ------------------------------
+function loadNextBatch() {
+  const page = document.body.dataset.page;
+
+  if (!articlesContainer || !infiniteLoader) return;
+
+  // Only infinite scroll on Articles page
+  if (page !== "articles") {
+    infiniteLoader.style.display = "none";
+    return;
+  }
+
+  if (isLoadingMore) return;
+  isLoadingMore = true;
+  infiniteLoader.textContent = "Loading more articles...";
+
+  const slice = currentList.slice(currentIndex, currentIndex + BATCH_SIZE);
+  currentIndex += slice.length;
+
+  slice.forEach(article => {
+    const div = document.createElement("div");
+    div.className = "article";
+    div.dataset.category = article.category || "General";
+
+    const smallImg = article.thumbnail?.url
+      ? article.thumbnail.url.replace(
+          "/upload/",
+          "/upload/w_300,h_200,c_fill,q_auto,f_auto/"
+        )
+      : "";
+
+    div.innerHTML = `
+      ${smallImg ? `<img src="${smallImg}" />` : ""}
+      <h2>${article.title || "Untitled"}</h2>
+      <p>${(article.content || "")
+        .replace(/<[^>]+>/g, "")
+        .substring(0, 120)}...</p>
+    `;
+
+    div.onclick = () => openModal(article);
+
+    articlesContainer.appendChild(div);
+  });
+
+  setupScrollReveal();
+
+  isLoadingMore = false;
+  infiniteLoader.textContent =
+    currentIndex >= currentList.length
+      ? "No more articles."
+      : "Scroll to load more...";
+}
+
+// ------------------------------
+// SCROLL HANDLER FOR INFINITE SCROLL
+// ------------------------------
+window.addEventListener("scroll", () => {
+  const page = document.body.dataset.page;
+  if (page !== "articles") return;
+
+  const scrollPosition = window.innerHeight + window.scrollY;
+  const threshold = document.body.offsetHeight - 400;
+
+  if (scrollPosition >= threshold) {
+    loadNextBatch();
+  }
+});
+
+// ------------------------------
+// DARK MODE TOGGLE
+// ------------------------------
+const toggle = document.getElementById("themeToggle");
+
+function applyFooterTheme() {
+  const isDark = document.body.classList.contains("dark");
+  const footer = document.querySelector(".loop-footer");
+  if (!footer) return;
+
+  const icons = footer.querySelectorAll(".footer-icon svg");
+  icons.forEach(icon => {
+    icon.style.color = isDark ? "#eaeaea" : "#000";
+  });
+}
+
+if (toggle) {
+  toggle.onclick = () => {
+    document.body.classList.toggle("dark");
+
+    toggle.textContent = document.body.classList.contains("dark")
+      ? "☀️"
+      : "🌙";
+
+    toggle.style.transform = "rotate(360deg)";
+    setTimeout(() => {
+      toggle.style.transform = "rotate(0deg)";
+    }, 300);
+
+    applyFooterTheme();
+    localStorage.setItem(
+      "loop-theme",
+      document.body.classList.contains("dark") ? "dark" : "light"
+    );
+  };
+}
+
+// Restore theme on load
+(function restoreTheme() {
+  const saved = localStorage.getItem("loop-theme");
+  if (saved === "dark") {
+    document.body.classList.add("dark");
+    if (toggle) toggle.textContent = "☀️";
+  }
+  applyFooterTheme();
+})();
+
+// ------------------------------
+// SEARCH BAR FILTER
+// ------------------------------
+if (searchInput) {
+  searchInput.oninput = () => {
+    applyFiltersAndRender();
+  };
+}
+
+// ------------------------------
+// CATEGORY FILTERS
+// ------------------------------
+filterButtons.forEach(btn => {
+  btn.onclick = () => {
+    filterButtons.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    applyFiltersAndRender();
+  };
+});
+
+// ------------------------------
+// SORTING
+// ------------------------------
+if (sortSelect) {
+  sortSelect.onchange = () => {
+    applyFiltersAndRender();
+  };
+}
+
+// ------------------------------
+// SCROLL TO TOP BUTTON
+// ------------------------------
+const scrollBtn = document.getElementById("scrollTop");
+
+if (scrollBtn) {
+  window.addEventListener("scroll", () => {
+    scrollBtn.style.display = window.scrollY > 200 ? "block" : "none";
+  });
+
+  scrollBtn.onclick = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+}
+
+// ------------------------------
+// SCROLL REVEAL (AOS STYLE)
+// ------------------------------
+function setupScrollReveal() {
+  const reveals = document.querySelectorAll(".article:not(.visible)");
+
+  const observer = new IntersectionObserver(
+    entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.15 }
+  );
+
+  reveals.forEach(el => observer.observe(el));
+}
+
+// ------------------------------
+// ARTICLE DETAIL MODAL
+// ------------------------------
+function openModal(article) {
+  if (!modal) return;
+
+  const modalImg = article.thumbnail?.url
+    ? article.thumbnail.url.replace(
+        "/upload/",
+        "/upload/w_800,h_500,c_fill,q_auto,f_auto/"
+      )
+    : "";
+
+  if (modalImage && modalImg) modalImage.src = modalImg;
+  if (modalTitle) modalTitle.textContent = article.title || "Untitled";
+
+  const cat = (article.category || "General").toLowerCase();
+  if (modalCategory) {
+    modalCategory.innerHTML = `
+      <span class="modal-badge ${cat}">${article.category || "General"}</span>
+    `;
+  }
+
+  if (modalContent) {
+    modalContent.innerHTML = `
+      <div class="modal-text">
+        ${article.content || ""}
+      </div>
+      <div class="modal-share">
+        Share:
+        <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(
+          article.title || ""
+        )}" target="_blank">Twitter</a>
+        <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://loop.com/article/${
+          article._id || ""
+        }" target="_blank">LinkedIn</a>
+      </div>
+    `;
+  }
+
+  modal.style.display = "block";
+}
+
+if (modalClose && modal) {
+  modalClose.onclick = () => {
+    modal.style.display = "none";
+  };
+
+  window.onclick = e => {
+    if (e.target === modal) {
+      modal.style.display = "none";
+    }
+  };
+}
+
+// ------------------------------
+// INIT
+// ------------------------------
+loadArticles();
+setupScrollReveal();
