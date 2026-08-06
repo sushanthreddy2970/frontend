@@ -794,7 +794,7 @@ body.dark footer {
   padding: 40px 20px;
   text-align: center;
   border-top: 1px solid rgba(0,0,0,0.1);
-  background: #EAB790;
+  background: #eca97b;
   backdrop-filter: blur(12px);
   transition: background 0.3s ease, color 0.3s ease;
 }
