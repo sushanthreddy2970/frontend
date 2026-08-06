@@ -657,6 +657,7 @@ body.dark .modal-content {
   width: 90%;
   border-radius: 8px;
   margin-bottom: 8px;
+  margin-left: 20px;
 }
 
 #modalCategory {
