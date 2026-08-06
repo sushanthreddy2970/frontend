@@ -709,6 +709,7 @@ body.dark .modal-badge {
 }
 
 .modal-share a {
+  margin-top: 30px;
   margin-right: 12px;
   text-decoration: none;
   font-weight: bold;
