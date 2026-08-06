@@ -661,7 +661,16 @@ body.dark .modal-content {
 
 #modalCategory {
   margin-bottom: 10px;
+  margin-right: 6px;
+  color: #1e1e1e;
 }
+
+body.dark #modalCategory {
+  margin-bottom: 10px;
+  margin-right: 6px;
+  color: #ffe7d6;
+}
+
 
 .modal-badge {
   display: inline-block;
