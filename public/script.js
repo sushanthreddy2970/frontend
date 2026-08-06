@@ -420,12 +420,9 @@ function openModal(article) {
       </div>
       <div class="modal-share">
         Share:
-        <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(
+        <a href="https://www.instagram.com/?hl=en${encodeURIComponent(
           article.title || ""
-        )}" target="_blank">Twitter</a>
-        <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://loop.com/article/${
-          article._id || ""
-        }" target="_blank">LinkedIn</a>
+        )}" target="_blank">Instagram</a>
       </div>
     `;
   }
