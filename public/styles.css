@@ -678,7 +678,16 @@ body.dark #modalCategory {
   border-radius: 20px;
   font-size: 0.85rem;
   font-weight: bold;
-  color: white;
+  color: rgb(27, 27, 27);
+}
+
+body.dark .modal-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: rgb(254, 229, 214);
 }
 
 .modal-badge.tech { background: #3b82f6; }
